@@ -2,7 +2,7 @@ import threading
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 import time
-from paramiko_sync import setup_connection, create_file, create_directory, moved_file_or_dir, deleted_file, remove_directory
+from paramiko_sync import setup_connection, create_file, create_directory, moved_file_or_dir, remove_file_n_directory
 
 # Watchdog Tryout
 # class Watcher(FileSystemEventHandler):
@@ -48,21 +48,13 @@ class Watcher(FileSystemEventHandler):
         return super().on_moved(event)
     def on_deleted(self, event):
         self.syncer.last_event_time = time.monotonic()
-        if event.is_directory:
-            final_path = standardiser(event.src_path)
-            final_path = final_path.lstrip("./")
-            final_path = "/home/keoni/sync_folder/" + final_path
-            print(final_path == "/home/keoni/sync_folder/hello")
-            # client = setup_connection()
-            # sftp = client.open_sftp()
-            # remove_directory(sftp, final_path)
-            # sftp.close()
-            # client.close()
-            print("Directory deleted: ", event.src_path)
-        else:
-            final_path = standardiser(event.src_path)
-            deleted_file(final_path)
-            print("File deleted: ", final_path)
+        final_path = standardiser(event.src_path)
+        client = setup_connection()
+        sftp = client.open_sftp()
+        remove_file_n_directory(sftp, final_path)
+        sftp.close()
+        client.close()
+        print("Deleted: ", event.src_path)
         return
     def on_modified(self, event):
         self.syncer.last_event_time = time.monotonic()

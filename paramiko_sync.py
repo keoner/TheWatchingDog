@@ -57,6 +57,14 @@ def remove_directory(sftp, file_path):
 
     sftp.rmdir(file_path)
 
+def remove_file_n_directory(sftp, final_path):
+    full_path = "/home/keoni/sync_folder/" + final_path.lstrip("./")
+    attr = sftp.stat(full_path)
+    if stat.S_ISDIR(attr.st_mode):
+        remove_directory(sftp, full_path)
+    else:
+        sftp.remove(full_path)
+
 # client = setup_connection()
 # sftp = client.open_sftp()
 # remove_directory(sftp, "/home/keoni/sync_folder/hello")
